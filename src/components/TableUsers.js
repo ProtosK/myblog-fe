@@ -5,7 +5,9 @@ import ReactPaginate from "react-paginate";
 import ModalAddNew from "./ModalAddNew";
 import ModalEditUser from "./ModalEditUser";
 import ModalConfirm from "./ModalConfirm";
-import _ from "lodash"; // lam viec voi mang
+import _, { debounce } from "lodash"; // lam viec voi mang
+import "./TableUser.scss";
+import { CSVLink, CSVDownload } from "react-csv";
 
 const TableUsers = (props) => {
   // state data
@@ -18,6 +20,10 @@ const TableUsers = (props) => {
   const [isShowModalAddNew, setIsShowModalAddNew] = useState(false);
   const [isShowModalEditUser, setIsShowModalEditUser] = useState(false);
   const [isShowModalDelete, setIsShowModalDelete] = useState(false);
+  // state sort, search, filter...
+  const [sortBy, setSortBy] = useState("asc");
+  const [sortField, setSortField] = useState("id");
+  const [keyword, setKeyword] = useState("");
 
   // initialization value when app load and get users from service
   useEffect(() => {
@@ -76,28 +82,111 @@ const TableUsers = (props) => {
   const handleDeleteUserFromModal = (user) => {
     console.log(">>> data from modal delete: ", user);
     let cloneListUsers = _.cloneDeep(listUsers);
-    cloneListUsers = cloneListUsers.filter(item=> item.id !== user.id)
-    
+    cloneListUsers = cloneListUsers.filter((item) => item.id !== user.id);
+
     setListUsers(cloneListUsers);
   };
 
+  // SORT, SEARCH, FILTER
+  const handleSort = (sortBy, sortField) => {
+    setSortBy(sortBy);
+    setSortField(sortField);
+
+    let cloneListUsers = _.cloneDeep(listUsers);
+    cloneListUsers = _.orderBy(cloneListUsers, [sortField], [sortBy]);
+    setListUsers(cloneListUsers);
+  };
+
+  const handleSearch = debounce((e) => {
+    let term = e.target.value;
+    if (term) {
+      let cloneListUsers = _.cloneDeep(listUsers);
+      cloneListUsers = cloneListUsers.filter((item) =>
+        item.email.includes(term)
+      );
+      setListUsers(cloneListUsers);
+    } else {
+      getUsers(1);
+    }
+  }, 500);
+  // ========== LAYOUT ==========
+
+  const csvData = [
+    ["firstname", "lastname", "email"],
+    ["Ahmed", "Tomi", "ah@smthing.co.com"],
+    ["Raed", "Labes", "rl@smthing.co.com"],
+    ["Yezzi", "Min l3b", "ymin@cocococo.com"],
+  ];
   return (
     <>
       <div className="my-3 add-new">
-        <span>List Users:</span>
-        <button
-          className="btn btn-success"
-          onClick={() => setIsShowModalAddNew(true)}
-        >
-          Add new user
-        </button>
+        <span>
+          <b>List Users:</b>
+        </span>
+        <div className="group-btns">
+          <label htmlFor="test" className="btn btn-warning">
+            <i className="fa-solid fa-file-import"></i> Import
+          </label>
+          <input id="test" type="file" hidden />
+          <CSVLink
+            filename={"my-file.csv"}
+            className="btn btn-primary"
+            target="_blank"
+            data={csvData}
+          >
+            <i className="fa-solid fa-file-arrow-down"></i> Export
+          </CSVLink>
+
+          <button
+            className="btn btn-success"
+            onClick={() => setIsShowModalAddNew(true)}
+          >
+            <i className="fa-solid fa-circle-plus"></i> Add new
+          </button>
+        </div>
+      </div>
+      <div className="col-4 my-3">
+        <input
+          className="form-control"
+          placeholder="Search user by email..."
+          // value={keyword}
+          onChange={(e) => handleSearch(e)}
+        />
       </div>
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>
+              <div className="sort-header">
+                <span>ID</span>
+                <span>
+                  <i
+                    className="fa-solid fa-arrow-down-long"
+                    onClick={() => handleSort("desc", "id")}
+                  ></i>
+                  <i
+                    className="fa-solid fa-arrow-up-long"
+                    onClick={() => handleSort("asc", "id")}
+                  ></i>
+                </span>
+              </div>
+            </th>
             <th>Identifier</th>
-            <th>FullName</th>
+            <th>
+              <div className="sort-header">
+                <span>FullName</span>
+                <span>
+                  <i
+                    className="fa-solid fa-arrow-down-long"
+                    onClick={() => handleSort("desc", "first_name")}
+                  ></i>
+                  <i
+                    className="fa-solid fa-arrow-up-long"
+                    onClick={() => handleSort("asc", "first_name")}
+                  ></i>
+                </span>
+              </div>
+            </th>
             <th>Job</th>
             <th>Birthday</th>
             <th>Address</th>
