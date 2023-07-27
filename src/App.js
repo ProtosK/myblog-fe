@@ -1,21 +1,27 @@
 import { Container } from "react-bootstrap";
 import "./App.scss";
-import Header from "./components/Header";
-import TableUsers from "./components/TableUsers";
 import { ToastContainer } from "react-toastify";
+import { Routes, Route, Link } from "react-router-dom";
 
+import Header from "./components/Pages/Header";
+import Footer from "./components/Pages/Footer";
+import Home from "./components/Pages/Home";
+import TableUsers from "./components/User/TableUsers";
 
 function App() {
-
   return (
     <>
       <div className="app-container">
         <Header />
         <Container>
-          <TableUsers />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/users" element={<TableUsers />} />
+          </Routes>
         </Container>
-        
+        <Footer />
       </div>
+
       <ToastContainer
         position="top-right"
         autoClose={5000}

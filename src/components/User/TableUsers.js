@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
-import { fetchAllUser } from "../services/UserService";
+import { fetchAllUser } from "../../services/UserService";
 import ReactPaginate from "react-paginate";
 import ModalAddNew from "./ModalAddNew";
 import ModalEditUser from "./ModalEditUser";
 import ModalConfirm from "./ModalConfirm";
 import _, { debounce } from "lodash"; // lam viec voi mang
 import "./TableUser.scss";
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink } from "react-csv";
+import Papa from "papaparse";
+import { toast } from "react-toastify";
 
 const TableUsers = (props) => {
   // state data
@@ -24,6 +26,8 @@ const TableUsers = (props) => {
   const [sortBy, setSortBy] = useState("asc");
   const [sortField, setSortField] = useState("id");
   const [keyword, setKeyword] = useState("");
+  // handle import, export file csv
+  const [dataExport, setDataExport] = useState([]);
 
   // initialization value when app load and get users from service
   useEffect(() => {
@@ -109,14 +113,111 @@ const TableUsers = (props) => {
       getUsers(1);
     }
   }, 500);
-  // ========== LAYOUT ==========
+  // ========== HANDLE DATA IMPORT, EXPORT FILE CSV ==========
 
-  const csvData = [
-    ["firstname", "lastname", "email"],
-    ["Ahmed", "Tomi", "ah@smthing.co.com"],
-    ["Raed", "Labes", "rl@smthing.co.com"],
-    ["Yezzi", "Min l3b", "ymin@cocococo.com"],
-  ];
+  // parameters event, done of library react-csv
+  const getUsersExport = (event, done) => {
+    let result = [];
+    if (listUsers && listUsers.length > 0) {
+      // build header
+      result.push([
+        "id",
+        "email",
+        "first_name",
+        "last_name",
+        "birthday",
+        "address",
+      ]);
+      // build body
+      listUsers.map((item, index) => {
+        let arr = [];
+        arr[0] = item.id;
+        arr[1] = item.email;
+        arr[2] = item.first_name;
+        arr[3] = item.last_name;
+        arr[4] = item.birthday || "build be";
+        arr[5] = item.address || "build be";
+        result.push(arr);
+      });
+
+      setDataExport(result);
+      done();
+    }
+    // OR CALL API AND CUSTOM DATA
+    //     if(!this.state.loading) {
+    //   this.setState({
+    //     loading: true
+    //   });
+    //   axios.get("/api/users").then((userListJson) => {
+    //     this.setState({
+    //       listOfUsers: userListJson,
+    //       loading: false
+    //     });
+    //     done(true); // Proceed and get data from dataFromListOfUsersState function
+    //   }).catch(() => {
+    //     this.setState({
+    //       loading: false
+    //     });
+    //     done(false);
+    //   });
+    // }
+  };
+
+  // handle import csv
+  const handleImportCSV = (event) => {
+    if (event.target && event.target.files && event.target.files[0]) {
+      let file = event.target.files[0];
+      if (file.type !== "text/csv") {
+        toast.error("Only accept csv or text file...");
+        return;
+      }
+
+      Papa.parse(file, {
+        // header: true, // convert type CSV -> type JSON of library
+        complete: function (results) {
+          // custom to JSON when to import
+          let rawCSV = results.data;
+          const COL_NUMBER = 5;
+          if (rawCSV.length > 0) {
+            // rawCSV[0].length===3: so cot header theo yeu cau = 3
+            if (rawCSV[0] && rawCSV[0].length === COL_NUMBER) {
+              if (
+                rawCSV[0][0] !== "email" ||
+                rawCSV[0][1] !== "first_name" ||
+                rawCSV[0][2] !== "last_name" ||
+                rawCSV[0][3] !== "birthday" ||
+                rawCSV[0][4] !== "address"
+              ) {
+                toast.error(`Wrong field HEADER format CSV file!`);
+              } else {
+                let result = [];
+
+                rawCSV.map((item, index) => {
+                  if (index > 0 && item.length === COL_NUMBER) {
+                    let obj = {};
+                    obj.email = item[0];
+                    obj.first_name = item[1];
+                    obj.last_name = item[2];
+                    obj.birthday = item[3];
+                    obj.address = item[4];
+
+                    result.push(obj);
+                  }
+                });
+                setListUsers(result);
+                console.log("Finished", result);
+              }
+            } else {
+              toast.error(`Number of columns must be equal to ${COL_NUMBER}`);
+            }
+          } else {
+            toast.error("Not found data on CSV file!");
+          }
+        },
+      });
+    }
+  };
+
   return (
     <>
       <div className="my-3 add-new">
@@ -127,12 +228,19 @@ const TableUsers = (props) => {
           <label htmlFor="test" className="btn btn-warning">
             <i className="fa-solid fa-file-import"></i> Import
           </label>
-          <input id="test" type="file" hidden />
+          <input
+            id="test"
+            type="file"
+            hidden
+            onChange={(event) => handleImportCSV(event)}
+          />
           <CSVLink
             filename={"my-file.csv"}
             className="btn btn-primary"
             target="_blank"
-            data={csvData}
+            data={dataExport}
+            asyncOnClick={true}
+            onClick={getUsersExport}
           >
             <i className="fa-solid fa-file-arrow-down"></i> Export
           </CSVLink>
