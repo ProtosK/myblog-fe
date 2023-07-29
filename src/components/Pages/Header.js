@@ -3,13 +3,31 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import logoApp from "../../assets/images/logo192.png";
-import { useLocation, NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const Header = (props) => {
-  const location = useLocation();
+  const [hideHeader, setHideHeader] = useState(false);
+
+  // useEffect(() => {
+  //   if (window.location.pathname === "/login") {
+  //     setHideHeader(true);
+  //   }
+  // }, []);
+
+  const { logout, user } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    toast.success("Log out success!");
+  };
 
   return (
-    <>
+    <div className="header-container">
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container>
           <Navbar.Brand href="/">
@@ -20,31 +38,55 @@ const Header = (props) => {
               className="d-inline-block align-top"
               alt="React Bootstrap logo"
             />
-            <span>BIG BUG</span>
+            <span>
+              <b>BIG BUG</b>
+            </span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <NavLink to="/" className="nav-link">
-                Home
-              </NavLink>
-              <NavLink to="/users" className="nav-link">
-                Manage Users
-              </NavLink>
-            </Nav>
-            <Nav className="">
-              <NavDropdown title="Setting" id="basic-nav-dropdown">
-                <NavDropdown.Item href="/login">Login</NavDropdown.Item>
-                <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
-                <NavDropdown.Item href="/setting">Setting</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="/logout">Logout</NavDropdown.Item>
-              </NavDropdown>
-            </Nav>
+            {(user && user.auth || window.location.pathname === "/") && (
+              <>
+                <Nav className="me-auto">
+                  <NavLink to="/" className="nav-link">
+                    Home
+                  </NavLink>
+                  <NavLink to="/users" className="nav-link">
+                    Manage Users
+                  </NavLink>
+                </Nav>
+                <Nav className="">
+                  {user && user.email && (
+                    <span className="nav-link">
+                      <i>Welcome</i> <b>{user.email}</b>
+                    </span>
+                  )}
+                  <NavDropdown title="Setting" id="basic-nav-dropdown">
+                    {user && user.auth === true ? (
+                      <>
+                        <NavLink to="/profile" className="dropdown-item">
+                          Profile
+                        </NavLink>
+                        <NavLink to="/setting" className="dropdown-item">
+                          Setting
+                        </NavLink>
+                        <NavDropdown.Divider />
+                        <NavDropdown.Item onClick={() => handleLogout()}>
+                          Logout
+                        </NavDropdown.Item>
+                      </>
+                    ) : (
+                      <NavLink to="/login" className="dropdown-item">
+                        Login
+                      </NavLink>
+                    )}
+                  </NavDropdown>
+                </Nav>
+              </>
+            )}
           </Navbar.Collapse>
         </Container>
       </Navbar>
-    </>
+    </div>
   );
 };
 

@@ -1,5 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap");
+// * {
+//   margin: 0;
+//   padding: 0;
+//   box-sizing: border-box;
+//   font-family: "Poppins", sans-serif;
+// }
+
 body {
   margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
@@ -13,5 +22,139 @@ code {
 }
 
 .app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+
+    .title {
+      text-align: center;
+      font-size: 23px;
+      font-weight: 600;
+      padding-top: 30px;
+    }
+
+    .text {
+      font-weight: 600;
+      padding-bottom: 3px;
+    }
+
+    input {
+      padding: 12px 7px;
+      outline: none;
+      background: #1618230f;
+      border: #1618230f;
+      margin-bottom: 7px;
+      border-radius: 3px;
+      width: 100%;
+
+      &:hover {
+        background-color: #dedede;
+        // border: 1px solid #dedede;
+      }
+    }
+
+    .input-pass {
+      position: relative;
+
+      i {
+        position: absolute;
+        top: 15px;
+        right: 10px;
+        cursor: pointer;
+      }
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 3px;
+      outline: none;
+      border: none;
+
+      &.active {
+        background-color: #fe2c55;
+        color: white;
+      }
+    }
+
+    button[disabled="disabled"],
+    button:disabled {
+      cursor: not-allowed;
+    }
+
+    .back {
+      text-align: center;
+      margin-top: 30px;
+      cursor: pointer;
+    }
+  }
+
+  .footer-container {
+    position: relative;
+    width: 100%;
+    background: #3586ff;
+    min-height: 100px;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: auto;
+
+    .social-icon {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+      flex-wrap: wrap;
+
+      .social-icon__item {
+        list-style: none;
+
+        .social-icon__link {
+          font-size: 2rem;
+          color: #fff;
+          margin: 0 10px;
+          display: inline-block;
+          transition: 0.5s;
+        }
+        .social-icon__link:hover {
+          transform: translateY(-10px);
+        }
+      }
+    }
+    .menu {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+      flex-wrap: wrap;
+
+      .menu__item {
+        list-style: none;
+
+        .menu__link {
+          font-size: 1.2rem;
+          color: #fff;
+          margin: 0 10px;
+          display: inline-block;
+          transition: 0.5s;
+          text-decoration: none;
+          opacity: 0.75;
+          font-weight: 300;
+        }
+
+        .menu__link:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
 }
