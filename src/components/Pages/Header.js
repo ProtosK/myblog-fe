@@ -9,13 +9,6 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 
 const Header = (props) => {
-  const [hideHeader, setHideHeader] = useState(false);
-
-  // useEffect(() => {
-  //   if (window.location.pathname === "/login") {
-  //     setHideHeader(true);
-  //   }
-  // }, []);
 
   const { logout, user } = useContext(UserContext);
   const navigate = useNavigate();
@@ -44,7 +37,7 @@ const Header = (props) => {
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            {(user && user.auth || window.location.pathname === "/") && (
+            {((user && user.auth) || window.location.pathname === "/") && (
               <>
                 <Nav className="me-auto">
                   <NavLink to="/" className="nav-link">
